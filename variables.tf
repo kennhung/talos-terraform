@@ -1,31 +1,38 @@
 variable "cluster_name" {
   type    = string
+  description = "Name of the Talos cluster."
   default = "talos-cluster"
 }
 
 variable "talos_version" {
   type    = string
+  description = "Talos version to use (empty for latest)."
   default = ""
 }
 
 variable "talos_endpoints" {
   type = list(string)
+  description = "List of Talos endpoint IP addresses."
 }
 
 variable "k8s_endpoint" {
   type = string
+  description = "Kubernetes API endpoint IP address."
 }
 
 variable "gateway" {
   type = string
+  description = "Network gateway IP address."
 }
 
 variable "dns_servers" {
   type = list(string)
+  description = "List of DNS server IP addresses."
 }
 
 variable "proxmox_network_bridge" {
   type = string
+  description = "Proxmox network bridge to use for the VMs."
 }
 
 variable "control_plane" {
@@ -37,6 +44,7 @@ variable "control_plane" {
     memory_mb    = optional(number, 2048)
     ipv4_address = string
   }))
+  description = "Control plane node configurations."
 
   default = []
 }
@@ -51,6 +59,7 @@ variable "worker" {
     ipv4_address         = string
     additional_disk_size = optional(number, 60)
   }))
+  description = "Worker node configurations."
 
   default = []
 }
