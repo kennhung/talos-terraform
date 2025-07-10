@@ -3,19 +3,40 @@ locals {
   talos_pve_nodes = toset(concat([for v in var.control_plane : v.node_name], [for v in var.worker : v.node_name]))
 }
 
-module "talos_nocloud_image" {
-  source = "./modules/talos-image-download"
-
-  for_each = local.talos_pve_nodes
-
-  proxmox_node_name = each.key
+module "talos_image_url" {
+  source = "./modules/talos-image-url"
 
   talos_version = var.talos_version
+}
 
-  image_filename_prefix = var.cluster_name # FIXME: auto generate unique filename_prefix
+locals {
+  image_filename = "talos-${module.talos_image_url.image_version}-${module.talos_image_url.image_schematic_id}-nocloud-amd64.img"
+}
+
+resource "proxmox_virtual_environment_download_file" "talos_nocloud_image" {
+  for_each = local.talos_pve_nodes
+
+  content_type = "iso"
+  datastore_id = "local"
+  node_name    = each.key
+
+  # Replace the .xz extension with .gz for the download URL
+  # This is necessary because the Proxmox download_file resource does not support .xz files directly.
+  url                     = replace(module.talos_image_url.image_download_urls.disk_image, "/\\.xz$/", ".gz")
+  file_name               = local.image_filename
+  decompression_algorithm = "gz"
+  overwrite               = false
+}
+
+locals {
+  talos_nocloud_image_ids = {
+    for node_name, file in proxmox_virtual_environment_download_file.talos_nocloud_image :
+    node_name => file.id
+  }
 }
 
 resource "talos_machine_secrets" "machine_secrets" {}
+
 data "talos_client_configuration" "talosconfig" {
   cluster_name         = var.cluster_name
   client_configuration = talos_machine_secrets.machine_secrets.client_configuration
@@ -23,7 +44,7 @@ data "talos_client_configuration" "talosconfig" {
 }
 
 data "talos_machine_configuration" "machineconfig_cp" {
-  talos_version = module.talos_nocloud_image[tolist(local.talos_pve_nodes)[0]].image_version
+  talos_version = module.talos_image_url.image_version
 
   cluster_name     = var.cluster_name
   cluster_endpoint = var.k8s_endpoint
@@ -35,7 +56,7 @@ data "talos_machine_configuration" "machineconfig_cp" {
 }
 
 data "talos_machine_configuration" "machineconfig_worker" {
-  talos_version = module.talos_nocloud_image[tolist(local.talos_pve_nodes)[0]].image_version
+  talos_version = module.talos_image_url.image_version
 
   cluster_name     = var.cluster_name
   cluster_endpoint = var.k8s_endpoint
@@ -57,7 +78,6 @@ module "talos_cp_vm" {
 
   depends_on = [
     talos_machine_secrets.machine_secrets,
-    module.talos_nocloud_image,
     data.talos_machine_configuration.machineconfig_cp,
   ]
 
@@ -76,7 +96,7 @@ module "talos_cp_vm" {
 
   dns_servers = var.dns_servers
 
-  talos_image_id = module.talos_nocloud_image[each.value.node_name].downloaded_image_file.id
+  talos_image_id = local.talos_nocloud_image_ids[each.value.node_name]
 
   client_configuration        = talos_machine_secrets.machine_secrets.client_configuration
   machine_configuration_input = data.talos_machine_configuration.machineconfig_cp.machine_configuration
@@ -87,7 +107,6 @@ module "talos_worker_vm" {
 
   depends_on = [
     talos_machine_secrets.machine_secrets,
-    module.talos_nocloud_image,
     data.talos_machine_configuration.machineconfig_worker,
   ]
 
@@ -106,7 +125,7 @@ module "talos_worker_vm" {
 
   dns_servers = var.dns_servers
 
-  talos_image_id = module.talos_nocloud_image[each.value.node_name].downloaded_image_file.id
+  talos_image_id = local.talos_nocloud_image_ids[each.value.node_name]
 
   additional_disks = [
     {
