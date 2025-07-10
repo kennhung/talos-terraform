@@ -9,8 +9,17 @@ module "talos_image_url" {
   talos_version = var.talos_version
 }
 
+resource "random_pet" "talos_image_name" {}
+
 locals {
-  image_filename = "talos-${module.talos_image_url.image_version}-${module.talos_image_url.image_schematic_id}-nocloud-amd64.img"
+  image_filename = format("%s.img", join("-", [
+    "talos",
+    module.talos_image_url.image_version,
+    module.talos_image_url.image_schematic_id,
+    module.talos_image_url.image_platform,
+    module.talos_image_url.image_architecture,
+    random_pet.talos_image_name.id,
+  ]))
 }
 
 resource "proxmox_virtual_environment_download_file" "talos_nocloud_image" {
