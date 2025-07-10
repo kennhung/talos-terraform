@@ -1,37 +1,43 @@
 variable "cluster_name" {
-  type    = string
+  type        = string
   description = "Name of the Talos cluster."
-  default = "talos-cluster"
+  default     = "talos-cluster"
 }
 
 variable "talos_version" {
-  type    = string
+  type        = string
   description = "Talos version to use (empty for latest)."
-  default = ""
+  default     = ""
+}
+
+variable "talos_image_ids" {
+  type        = map(string)
+  description = "Talos image ID to use (only for custom image; if not supplied, the module will automatically download the image)."
+  default     = null
 }
 
 variable "talos_endpoints" {
-  type = list(string)
+  type        = list(string)
   description = "List of Talos endpoint IP addresses."
 }
 
 variable "k8s_endpoint" {
-  type = string
+  type        = string
   description = "Kubernetes API endpoint IP address."
 }
 
 variable "gateway" {
-  type = string
+  type        = string
   description = "Network gateway IP address."
 }
 
 variable "dns_servers" {
-  type = list(string)
+  type        = list(string)
   description = "List of DNS server IP addresses."
 }
 
 variable "proxmox_network_bridge" {
-  type = string
+  type        = string
   description = "Proxmox network bridge to use for the VMs."
 }
 

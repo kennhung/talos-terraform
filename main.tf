@@ -23,7 +23,7 @@ locals {
 }
 
 resource "proxmox_virtual_environment_download_file" "talos_nocloud_image" {
-  for_each = local.talos_pve_nodes
+  for_each = var.talos_image_ids == null ? local.talos_pve_nodes : []
 
   content_type = "iso"
   datastore_id = "local"
@@ -38,7 +38,7 @@ resource "proxmox_virtual_environment_download_file" "talos_nocloud_image" {
 }
 
 locals {
-  talos_nocloud_image_ids = {
+  talos_nocloud_image_ids = var.talos_image_ids != null ? var.talos_image_ids : {
     for node_name, file in proxmox_virtual_environment_download_file.talos_nocloud_image :
     node_name => file.id
   }
