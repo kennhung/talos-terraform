@@ -109,6 +109,7 @@ module "talos_cluster" {
 |------|-------------|------|---------|:--------:|
 | `cluster_name` | Name of the Talos cluster | `string` | `"talos-cluster"` | no |
 | `talos_version` | Talos version to use (empty for latest) | `string` | `""` | no |
+| `talos_image_ids` | Talos image ID to use (only for custom image; if not supplied, the module will automatically download the image) | `map(string)` | `null` | no |
 | `talos_endpoints` | List of Talos endpoint IP addresses | `list(string)` | n/a | yes |
 | `k8s_endpoint` | Kubernetes API endpoint URL | `string` | n/a | yes |
 | `gateway` | Network gateway IP address | `string` | n/a | yes |
