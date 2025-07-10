@@ -42,14 +42,6 @@ locals {
   download_url = replace(data.talos_image_factory_urls.this.urls.disk_image, "/\\.xz$/", ".gz")
 }
 
-output "image_download_url" {
-  value = local.download_url
-}
-
-output "image_schematic_id" {
-  value = local.schematic_id
-}
-
 locals {
   image_filename = var.image_filename != "" ? var.image_filename : "${var.image_filename_prefix}talos-${local.talos_version}-${local.schematic_id}-${var.image_platform}-${var.image_architecture}.img"
 }
@@ -63,8 +55,4 @@ resource "proxmox_virtual_environment_download_file" "talos_nocloud_image" {
   url                     = local.download_url
   decompression_algorithm = "gz"
   overwrite               = false
-}
-
-output "downloaded_image_file" {
-  value = proxmox_virtual_environment_download_file.talos_nocloud_image
 }
