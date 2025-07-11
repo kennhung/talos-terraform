@@ -69,3 +69,18 @@ variable "worker" {
 
   default = []
 }
+
+variable "talos_config_patches" {
+  type = object({
+    all    = optional(list(string), [])
+    cp     = optional(list(string), [])
+    worker = optional(list(string), [])
+  })
+  description = "Talos configuration patches to apply to all nodes, control plane nodes, and worker nodes."
+
+  default = {
+    all    = []
+    cp     = []
+    worker = []
+  }
+}

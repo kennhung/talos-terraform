@@ -61,7 +61,7 @@ data "talos_machine_configuration" "machineconfig_cp" {
   machine_type    = "controlplane"
   machine_secrets = talos_machine_secrets.machine_secrets.machine_secrets
 
-  # TODO: Implement config_patches
+  config_patches = concat(var.talos_config_patches.all, var.talos_config_patches.cp)
 }
 
 data "talos_machine_configuration" "machineconfig_worker" {
@@ -73,7 +73,7 @@ data "talos_machine_configuration" "machineconfig_worker" {
   machine_type    = "worker"
   machine_secrets = talos_machine_secrets.machine_secrets.machine_secrets
 
-  # TODO: Implement config_patches
+  config_patches = concat(var.talos_config_patches.all, var.talos_config_patches.worker)
 }
 
 # IP addresses of cp and workers
