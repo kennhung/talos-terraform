@@ -24,6 +24,12 @@ variable "cpu_cores" {
   description = "Number of CPU cores for the Talos VM."
 }
 
+variable "cpu_type" {
+  type        = string
+  description = "CPU type for the Talos VM."
+  default     = "kvm64"
+}
+
 variable "memory_mb" {
   type        = number
   description = "Memory size (MB) for the Talos VM."
